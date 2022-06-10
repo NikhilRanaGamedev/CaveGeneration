@@ -95,18 +95,6 @@ function DrawInputBoxes()
 		SmoothenCave(); // Smoothen the cave.
     });
 
-	let removeCavernsButton = createButton('Remove Caverns!');
-    removeCavernsButton.size(100, 32);
-    removeCavernsButton.position(825, 8);
-    removeCavernsButton.mousePressed(function()
-    {
-		if (Cells.length > 0)
-		{
-			RemoveCaverns();
-			DrawCells();
-		}
-    });
-
 	function UpdateInputs()
 	{
 		XSize = Number(inputXSize.value());
@@ -123,30 +111,10 @@ function SmoothenCave()
 		UpdateCells();	
 	
 	// Remove isolated caves.
-	// RemoveCaverns();
-
 	RemoveCaverns();
 
-	let startNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
-	let endNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
-
-	while (startNode.state == State.WALL)
-	{
-		startNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
-	}
-
-	while (endNode.state == State.WALL)
-	{
-		endNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
-	}
-
-	let aStar = new AStar(startNode, endNode, Cells);
-	let path = aStar.GeneratePath();
-	let closedSet = aStar.GetClosedSet();
-	let openSet = aStar.GetOpenSet();
-
 	// Draw the cells.
-	DrawCells(path, closedSet, openSet, startNode, endNode);
+	DrawCells();
 }
 
 // Update the cells state.
@@ -174,11 +142,8 @@ function UpdateCells()
 }
 
 // Draw the cells
-function DrawCells(path, closedSet, openSet, startNode, endNode)
+function DrawCells()
 {
-	console.log(startNode);
-	console.log(endNode);
-
 	for (let y = 0; y < YSize; y++)
 	{
 		for (let x = 0; x < XSize; x++)
@@ -192,20 +157,7 @@ function DrawCells(path, closedSet, openSet, startNode, endNode)
 			else
 			{
 				// Draw a white square if cell is walkable.
-				if (path && path.includes(Cells[y][x]))
-					fill('blue');
-				else if (closedSet && closedSet.includes(Cells[y][x]))
-					fill('yellow');
-				else if (openSet && openSet.includes(Cells[y][x]))
-					fill('pink');
-				else
-					fill('white');
-				
-				if (Cells[y][x] == startNode)
-					fill(0, 255, 0);
-				else if (Cells[y][x] == endNode)
-					fill(255, 0, 0);
-
+				fill('white');
 				strokeWeight(0);
 				square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
 			}
@@ -279,4 +231,68 @@ function FloodFill(cavernList, cell)
 		cavernList.push(Cells[cell.y + 1][cell.x]);
 		FloodFill(cavernList, Cells[cell.y + 1][cell.x]);
 	}
+}
+
+function FindRandomPath()
+{
+	let startNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
+	let endNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
+
+	while (startNode.state == State.WALL)
+	{
+		startNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
+	}
+
+	while (endNode.state == State.WALL)
+	{
+		endNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
+	}
+
+	let aStar = new AStar(startNode, endNode, Cells);
+	let path = aStar.GeneratePath();
+	let closedSet = aStar.GetClosedSet();
+	let openSet = aStar.GetOpenSet();
+
+	DrawPath(path, closedSet, openSet);
+	DrawStartEnd(startNode, endNode);
+}
+
+function DrawPath(path, closedSet, openSet)
+{
+	for (let y = 0; y < YSize; y++)
+	{
+		for (let x = 0; x < XSize; x++)
+		{
+			if (Cells[y][x].state == State.PATH)
+			{
+				strokeWeight(0);
+
+				if (path && path.includes(Cells[y][x]))
+				{
+					fill('blue');
+					square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
+				}
+				else if (closedSet && closedSet.includes(Cells[y][x]))
+				{
+					fill('yellow');
+					square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
+				}
+				else if (openSet && openSet.includes(Cells[y][x]))
+				{
+					fill('pink');
+					square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
+				}
+			}
+		}
+	}
+}
+
+function DrawStartEnd(startNode, endNode)
+{
+	strokeWeight(0);
+
+	fill(0, 255, 0);
+	square(startNode.x * CellSize + Offset, startNode.y * CellSize + Offset, CellSize);
+	fill(255, 0, 0);
+	square(endNode.x * CellSize + Offset, endNode.y * CellSize + Offset, CellSize);
 }
