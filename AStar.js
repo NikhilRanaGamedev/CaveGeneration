@@ -53,7 +53,7 @@ class AStar
                 }
                 
                 // Calculate the gCost for the current node.
-                let gCost = currentNode.gCost + 1;
+                let gCost = currentNode.gCost + this.GetDistance(currentNode, neigbours[i]);
                 
                 // If the neighbour is not in the open set, or the current gCost is greater than its older gCost.
                 if (gCost < neigbours[i].gCost || !openSet.includes(neigbours[i]))
@@ -61,7 +61,7 @@ class AStar
                     neigbours[i].parent = currentNode; // Parent the currentNode to the neighbour.
                     
                     neigbours[i].gCost = gCost; // Set the gCost of the neighbour.
-                    neigbours[i].hCost = this.GetManhattanDistance(neigbours[i]); // Set the hCost(distance from the endNode) of the neighbour.
+                    neigbours[i].hCost = this.GetDistance(this.end, neigbours[i]); // Set the hCost(distance from the endNode) of the neighbour.
                     neigbours[i].fCost = neigbours[i].gCost + neigbours[i].hCost; // Set the fCost of the neighbour.
 
                     openSet.push(neigbours[i]); // Add the neighbour to the open set.
@@ -132,7 +132,7 @@ class AStar
 
         for (let i = 0; i < list.length; i++)
         {
-            if (list[i].fCost < lowestFCost)
+            if (list[i].fCost < lowestFCost || (list[i].fCost == lowestFCost && list[i].hCost < bestNode.hCost))
             {
                 lowestFCost = list[i].fCost;
                 bestNode = list[i];
@@ -143,10 +143,20 @@ class AStar
     }
 
     // Calculate the distance between a node and the end node using the Manhattan Distance.
-    GetManhattanDistance(node)
+    GetDistance(nodeA, nodeB)
     {
-        // return Math.abs(this.end.x - node.x) + Math.abs(this.end.y - node.y);
-        return Math.sqrt(Math.sqrt(this.end.x - node.x) + Math.sqrt(this.end.y - node.y));
+        // return Math.sqrt(Math.pow(nodeA.y - nodeB.y, 2) + Math.pow(nodeA.x - nodeB.x, 2));
+
+        let disX = Math.abs(nodeA.x - nodeB.x);
+        let disY = Math.abs(nodeA.y - nodeB.y);
+
+        if(disX > disY)
+        {
+            return 14 * disY + 10 * (disX - disY);
+        } else
+        {
+            return 14 * disX + 10 * (disY - disX);
+        }
     }
 
     GetClosedSet()
