@@ -17,10 +17,10 @@ Step 4 - Rinse and Repeat Step 2 and 3 as much you like to smoothen out the cave
 # Removing Unconnected Caverns
 The above method will give us a lot of caverns which will not be connected to each other. There are two ways to tackle this, either remove the caverns or connect them. To remove the caverns we will do a flood fill search on which cavern is the largest, and remove the rest.
 
-Step 1 - Loop through all PATH cells.
-         If a PATH cell is not marked as searched then check its 4 adjacent neighbours and store the cell in an array.
-         Else if a cell is either marked or is a WALL, return out.
-Step 2 - Loop through the 4 neigbours using Step 1.
+Step 1 - Loop through all PATH cells.<br>
+         If a PATH cell is not marked as searched then check its 4 adjacent neighbours and store the cell in an array.<br>
+         Else if a cell is either marked or is a WALL, return out.<br><br>
+Step 2 - Loop through the 4 neigbours using Step 1.<br>
 
 ![Flood Fill Search](https://user-images.githubusercontent.com/38834548/173407878-6c3603a6-2db9-49dd-a1e4-73f827ca3b4b.png)
 
