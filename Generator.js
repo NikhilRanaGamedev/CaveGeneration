@@ -11,7 +11,7 @@ let Offset = 50; // Offset in X and Y. Shifts the draw point of the screen from 
 let XSize = 360; // Number of cells in X.
 let YSize = 160; // Number of cells in Y.
 
-let Smoothening = 15; // How Smooth the cave is.
+let SmoothIterations = 15; // How Smooth the cave is.
 
 // Sets up the simulation.
 function setup()
@@ -30,6 +30,7 @@ function DrawInputsText()
     text('Y:', 150, 20);
     text('Cell Size:', 300, 20);
     text('Smoothening:', 475, 20);
+    text('Remove Unconnected Caverns:', 675, 20);
 }
 
 // Draws the input boxes.
@@ -54,11 +55,15 @@ function DrawInputBoxes()
     let inputSmooth = createInput(15, int);
     inputSmooth.size(100, 25);
     inputSmooth.position(560, 8);
+    
+	let inputRemoveCaverns = createCheckbox('', true);
+    inputRemoveCaverns.size(100, 25);
+    inputRemoveCaverns.position(855, 14);
 
 	// Generate cave.
     let generateButton = createButton('Generate!');
     generateButton.size(100, 32);
-    generateButton.position(700, 8);
+    generateButton.position(900, 8);
     generateButton.mousePressed(function()
     {
 		clear();
@@ -70,14 +75,14 @@ function DrawInputBoxes()
 
 		let caveGenerator = new CaveGenerator(XSize, YSize, CellSize, Offset, Cells);
 		caveGenerator.Init(); // Initialize cells.
-		caveGenerator.SmoothenCave(Smoothening); // Smoothen the cave.
+		caveGenerator.SmoothenCave(SmoothIterations, inputRemoveCaverns.checked()); // Smoothen the cave.
 
 		function UpdateInputs()
 		{
 			XSize = Number(inputXSize.value());
 			YSize = Number(inputYSize.value());
 			CellSize = Number(inputCellSize.value());
-			Smoothening = Number(inputSmooth.value());
+			SmoothIterations = Number(inputSmooth.value());
 		}
     });
 }

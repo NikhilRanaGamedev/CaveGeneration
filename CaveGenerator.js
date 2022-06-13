@@ -57,14 +57,15 @@ class CaveGenerator
         }
     }
 
-    SmoothenCave(_smoothIterations)
+    SmoothenCave(_smoothIterations, _removeCaverns)
     {
         // Update States of all the cells.
         for (let i = 0; i < _smoothIterations; i++)
             this.UpdateCells();	
         
         // Remove isolated caves.
-        this.RemoveCaverns();
+        if (_removeCaverns)
+            this.RemoveCaverns();
 
         // Draw the cells.
         this.DrawCells();
