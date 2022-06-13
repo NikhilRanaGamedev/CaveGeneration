@@ -5,7 +5,7 @@ In this project a cave is generated through cellular automaton. A cellular autom
 Each cell in the grid can be in either of one states - WALL or PATH.
 
 Step 1 - Initialize a grid of cells. Randomly assign a state to the cell.<br>
-Step 2 - Loop through the cells using the following logic and store the new cell state.
+Step 2 - Loop through all the cells using the following logic and store the new cell state.
 
 If a cell is a path and has 5 or more wall neighbours, then change to a wall.<br>
 If a cell is a wall and has less than 4 wall neighbours, then change to a path.<br>
