@@ -4,14 +4,14 @@ const State = {
 	PATH: 1
 }
 
-let Cells = [];
-let CellSize = 5;
-let Offset = 50;
+let Cells = []; // Array to store cells.
+let CellSize = 5; // Size of each cell.
+let Offset = 50; // Offset in X and Y. Shifts the draw point of the screen from top left corner.
 
 let XSize = 360; // Number of cells in X.
-let YSize = 165; // Number of cells in Y.
+let YSize = 160; // Number of cells in Y.
 
-let Smoothening = 10;
+let Smoothening = 15; // How Smooth the cave is.
 
 // Sets up the simulation.
 function setup()
@@ -21,30 +21,6 @@ function setup()
 	
 	DrawInputsText(); // Draw the text for the input boxes.
 	DrawInputBoxes(); // Draw the Input boxes to take the inputs.
-}
-
-// Initialize cells.
-function Init()
-{
-	for (let y = 0; y < YSize; y++)
-	{
-		Cells[y] = [];
-
-		for (let x = 0; x < XSize; x++)
-		{
-			if (x == 0 || x == XSize - 1 || y == 0 || y == YSize - 1)
-			{
-				Cells[y][x] = new Cell(x, y, State.WALL);
-			}
-			else
-			{
-				// Cells have a random chance of either being born alive or dead.
-				let livingChance = Math.random(1);
-	
-				Cells[y][x] = new Cell(x, y, livingChance > 0.5 ? 1 : 0);
-			}
-		}
-	}
 }
 
 // Draws the text for the input boxes.
@@ -75,7 +51,7 @@ function DrawInputBoxes()
     inputCellSize.position(360, 8);
 
 	// Take Smoothening.
-    let inputSmooth = createInput(50, int);
+    let inputSmooth = createInput(15, int);
     inputSmooth.size(100, 25);
     inputSmooth.position(560, 8);
 
@@ -86,213 +62,22 @@ function DrawInputBoxes()
     generateButton.mousePressed(function()
     {
 		clear();
+
 		UpdateInputs();
 		createCanvas(XSize * CellSize + (Offset * 2), YSize * CellSize + (Offset * 2)); // Resize canvas.
 		background(180); // Color background.
-
 		DrawInputsText(); // Draw the text for the input boxes.
-		Init(); // Initialize cells.
-		SmoothenCave(); // Smoothen the cave.
+
+		let caveGenerator = new CaveGenerator(XSize, YSize, CellSize, Offset, Cells);
+		caveGenerator.Init(); // Initialize cells.
+		caveGenerator.SmoothenCave(Smoothening); // Smoothen the cave.
+
+		function UpdateInputs()
+		{
+			XSize = Number(inputXSize.value());
+			YSize = Number(inputYSize.value());
+			CellSize = Number(inputCellSize.value());
+			Smoothening = Number(inputSmooth.value());
+		}
     });
-
-	function UpdateInputs()
-	{
-		XSize = Number(inputXSize.value());
-        YSize = Number(inputYSize.value());
-        CellSize = Number(inputCellSize.value());
-		Smoothening = Number(inputSmooth.value());
-	}
-}
-
-function SmoothenCave()
-{
-	// Update States of all the cells.
-	for (let i = 0; i < Smoothening; i++)
-		UpdateCells();	
-	
-	// Remove isolated caves.
-	RemoveCaverns();
-
-	// Draw the cells.
-	DrawCells();
-}
-
-// Update the cells state.
-function UpdateCells()
-{
-	// First loop - Check each cell state. Don't update the states yet.
-	for (let y = 0; y < YSize; y++)
-	{
-		for (let x = 0; x < XSize; x++)
-		{
-			// Avoid edge cells.
-			if (x != 0 && x != XSize - 1 && y != 0 && y != YSize - 1)
-				Cells[y][x].CheckState(Cells);
-		}
-	}
-
-	// Second loop - Update the cell states.
-	for (let y = 0; y < YSize; y++)
-	{
-		for (let x = 0; x < XSize; x++)
-		{
-			Cells[y][x].UpdateState();
-		}
-	}
-}
-
-// Draw the cells
-function DrawCells()
-{
-	for (let y = 0; y < YSize; y++)
-	{
-		for (let x = 0; x < XSize; x++)
-		{
-			if (Cells[y][x].state == State.WALL)
-			{
-				// Draw a white square if cell is unwalkable.
-				fill('black');
-				square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
-			}
-			else
-			{
-				// Draw a white square if cell is walkable.
-				fill('white');
-				strokeWeight(0);
-				square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
-			}
-		}
-	}
-}
-
-function RemoveCaverns()
-{
-	let mainCave = [];
-
-	// Find all the caverns.
-	for (let y = 0; y < YSize; y++)
-	{
-		for (let x = 0; x < XSize; x++)
-		{
-			if (Cells[y][x].state == State.PATH)
-			{
-				let cavernList = [];
-				FloodFill(cavernList, Cells[y][x]);
-				
-				if (cavernList.length > mainCave.length)
-					mainCave = cavernList;
-			}
-		}
-	}
-
-	// Remove the isolated caverns.
-	for (let y = 0; y < YSize; y++)
-	{
-		for (let x = 0; x < XSize; x++)
-		{
-			if (!mainCave.includes(Cells[y][x]))
-			{
-				Cells[y][x].state = State.WALL;
-			}
-		}
-	}
-}
-
-// Flood Fill all the connected cells i.e. find the connected caverns.
-function FloodFill(cavernList, cell)
-{
-	if (cell.state == State.WALL || cell.checked == true)
-	{
-		return;
-	}
-	
-	cell.checked = true;
-
-	if (cell.x - 1 >= 0)
-	{
-		cavernList.push(Cells[cell.y][cell.x - 1]);
-		FloodFill(cavernList, Cells[cell.y][cell.x - 1]);
-	}
-
-	if (cell.x + 1 < Cells[0].length)
-	{
-		cavernList.push(Cells[cell.y][cell.x + 1]);
-		FloodFill(cavernList, Cells[cell.y][cell.x + 1]);
-	}
-
-	if (cell.y - 1 >= 0)
-	{
-		cavernList.push(Cells[cell.y - 1][cell.x]);
-		FloodFill(cavernList, Cells[cell.y - 1][cell.x]);
-	}
-
-	if (cell.y + 1 < Cells.length)
-	{
-		cavernList.push(Cells[cell.y + 1][cell.x]);
-		FloodFill(cavernList, Cells[cell.y + 1][cell.x]);
-	}
-}
-
-function FindRandomPath()
-{
-	let startNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
-	let endNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
-
-	while (startNode.state == State.WALL)
-	{
-		startNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
-	}
-
-	while (endNode.state == State.WALL)
-	{
-		endNode = Cells[Math.floor(Math.random() * YSize)][Math.floor(Math.random() * XSize)];
-	}
-
-	let aStar = new AStar(startNode, endNode, Cells);
-	let path = aStar.GeneratePath();
-	let closedSet = aStar.GetClosedSet();
-	let openSet = aStar.GetOpenSet();
-
-	DrawPath(path, closedSet, openSet);
-	DrawStartEnd(startNode, endNode);
-}
-
-function DrawPath(path, closedSet, openSet)
-{
-	for (let y = 0; y < YSize; y++)
-	{
-		for (let x = 0; x < XSize; x++)
-		{
-			if (Cells[y][x].state == State.PATH)
-			{
-				strokeWeight(0);
-
-				if (path && path.includes(Cells[y][x]))
-				{
-					fill('blue');
-					square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
-				}
-				else if (closedSet && closedSet.includes(Cells[y][x]))
-				{
-					fill('yellow');
-					square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
-				}
-				else if (openSet && openSet.includes(Cells[y][x]))
-				{
-					fill('pink');
-					square(x * CellSize + Offset, y * CellSize + Offset, CellSize);
-				}
-			}
-		}
-	}
-}
-
-function DrawStartEnd(startNode, endNode)
-{
-	strokeWeight(0);
-
-	fill(0, 255, 0);
-	square(startNode.x * CellSize + Offset, startNode.y * CellSize + Offset, CellSize);
-	fill(255, 0, 0);
-	square(endNode.x * CellSize + Offset, endNode.y * CellSize + Offset, CellSize);
 }
