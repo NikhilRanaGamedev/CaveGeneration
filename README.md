@@ -8,7 +8,7 @@ Step 1 - Initialize a grid of cells. Randomly assign a state to the cell.<br>
 Step 2 - Loop through the cells using the following logic and store the new cell state.
 
 If a cell is a path and has 5 or more wall neighbours, then change to a wall.<br>
-If a cell is a wall and has less than 4 neighbours, then change to a path.<br>
+If a cell is a wall and has less than 4 wall neighbours, then change to a path.<br>
 ![Cave Cell Logic](https://user-images.githubusercontent.com/38834548/173402810-09833a3f-fba7-4fc2-8c89-bdd074532d7e.png)
 
 Step 3 - Change to the new state.<br>
